@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lafz - AAC Communication Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS will be inserted here */
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-primary text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Lafz</h1>
+            <div class="flex items-center space-x-4">
+                <select id="languageSelect" class="bg-secondary text-black p-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-black">
+                    <option value="en-US">English</option>
+                    <option value="ar-SA">العربية</option>
+                </select>
+                <button id="keyboardToggleBtn" class="bg-secondary hover:bg-accent text-white px-3 py-2 rounded-lg font-medium button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22 5H2C.9 5 0 5.9 0 7v10c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-1 12H3c-.55 0-1-.45-1-1V8c0-.55.45-1 1-1h18c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1zM4 9h2v2H4zm0 3h2v2H4zm3 0h2v2H7zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm-9-3h2v2H7zm3 0h2v2h-2zm3 0h2v2h-2z"/>
+                    </svg>
+                </button>
+                <button id="settingsBtn" class="bg-secondary hover:bg-accent text-white px-3 py-2 rounded-lg font-medium button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.16-1.47-1.16-1.85 0L9.19 4.6c-.2.6-.7.9-1.3.9H6.5c-1.1 0-1.6.9-1.6 2v1.5c0 .6-.3 1.1-.9 1.3l-1.4 1.4c-1.16.38-1.16 1.47 0 1.85l1.4 1.4c.6.2.9.7.9 1.3v1.5c0 1.1.9 1.6 2 1.6h1.5c.6 0 1.1.3 1.3.9l1.4 1.4c.38 1.16 1.47 1.16 1.85 0l1.4-1.4c-.2-.6.7-.9 1.3-.9h1.5c1.1 0 1.6-.9 1.6-2v-1.5c0-.6.3-1.1.9-1.3l1.4-1.4c1.16-.38 1.16-1.47 0-1.85l-1.4-1.4c-.6-.2-.9-.7-.9-1.3V6.5c0-1.1-.9-1.6-2-1.6h-1.5c-.6 0-1.1-.3-1.3-.9l-1.4-1.4zM10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div class="header-emoji" role="img" aria-label="Child smiling">😊</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 flex flex-col">
+        <!-- Message Construction Area -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <div class="message-area" id="messageArea"></div>
+            <div class="flex justify-between mt-4">
+                <button onclick="speakMessage()" id="speakBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium button flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="speakBtnText">Speak</span>
+                </button>
+                <button onclick="clearMessage()" id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium button flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="clearBtnText">Clear</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="flex overflow-x-auto pb-2 mb-4 gap-2 scrollbar-hide">
+            <!-- Categories will be dynamically loaded here -->
+            <div id="categoryTabs" class="flex gap-2"></div>
+        </div>
+
+        <!-- Communication Buttons Grid -->
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 flex-grow" id="buttonsGrid">
+            <!-- Buttons will be dynamically loaded here -->
+        </div>
+
+        <!-- On-screen Keyboard -->
+        <div id="keyboardContainer" class="keyboard-container">
+            <!-- English Keyboard -->
+            <div id="englishKeyboard" class="keyboard-layout">
+                <div class="keyboard-row">
+                    <div class="keyboard-key" data-key="q">q</div>
+                    <div class="keyboard-key" data-key="w">w</div>
+                    <div class="keyboard-key" data-key="e">e</div>
+                    <div class="keyboard-key" data-key="r">r</div>
+                    <div class="keyboard-key" data-key="t">t</div>
+                    <div class="keyboard-key" data-key="y">y</div>
+                    <div class="keyboard-key" data-key="u">u</div>
+                    <div class="keyboard-key" data-key="i">i</div>
+                    <div class="keyboard-key" data-key="o">o</div>
+                    <div class="keyboard-key" data-key="p">p</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key" data-key="a">a</div>
+                    <div class="keyboard-key" data-key="s">s</div>
+                    <div class="keyboard-key" data-key="d">d</div>
+                    <div class="keyboard-key" data-key="f">f</div>
+                    <div class="keyboard-key" data-key="g">g</div>
+                    <div class="keyboard-key" data-key="h">h</div>
+                    <div class="keyboard-key" data-key="j">j</div>
+                    <div class="keyboard-key" data-key="k">k</div>
+                    <div class="keyboard-key" data-key="l">l</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key special-key" data-key="shift">⇧</div>
+                    <div class="keyboard-key" data-key="z">z</div>
+                    <div class="keyboard-key" data-key="x">x</div>
+                    <div class="keyboard-key" data-key="c">c</div>
+                    <div class="keyboard-key" data-key="v">v</div>
+                    <div class="keyboard-key" data-key="b">b</div>
+                    <div class="keyboard-key" data-key="n">n</div>
+                    <div class="keyboard-key" data-key="m">m</div>
+                    <div class="keyboard-key special-key" data-key="backspace">⌫</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key special-key" data-key="123">123</div>
+                    <div class="keyboard-key space-key" data-key=" ">___</div>
+                    <div class="keyboard-key special-key" data-key=".">.</div>
+                    <div class="keyboard-key special-key" data-key="enter">Enter</div>
+                </div>
+            </div>
+
+            <!-- Arabic Keyboard -->
+            <div id="arabicKeyboard" class="keyboard-layout" style="display: none;">
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key" data-key="ض">ض</div>
+                    <div class="keyboard-key" data-key="ص">ص</div>
+                    <div class="keyboard-key" data-key="ث">ث</div>
+                    <div class="keyboard-key" data-key="ق">ق</div>
+                    <div class="keyboard-key" data-key="ف">ف</div>
+                    <div class="keyboard-key" data-key="غ">غ</div>
+                    <div class="keyboard-key" data-key="ع">ع</div>
+                    <div class="keyboard-key" data-key="ه">ه</div>
+                    <div class="keyboard-key" data-key="خ">خ</div>
+                    <div class="keyboard-key" data-key="ح">ح</div>
+                    <div class="keyboard-key" data-key="ج">ج</div>
+                    <div class="keyboard-key" data-key="د">د</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key" data-key="ش">ش</div>
+                    <div class="keyboard-key" data-key="س">س</div>
+                    <div class="keyboard-key" data-key="ي">ي</div>
+                    <div class="keyboard-key" data-key="ب">ب</div>
+                    <div class="keyboard-key" data-key="ل">ل</div>
+                    <div class="keyboard-key" data-key="ا">ا</div>
+                    <div class="keyboard-key" data-key="ت">ت</div>
+                    <div class="keyboard-key" data-key="ن">ن</div>
+                    <div class="keyboard-key" data-key="م">م</div>
+                    <div class="keyboard-key" data-key="ك">ك</div>
+                    <div class="keyboard-key" data-key="ط">ط</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key special-key" data-key="shift">⇧</div>
+                    <div class="keyboard-key" data-key="ئ">ئ</div>
+                    <div class="keyboard-key" data-key="ء">ء</div>
+                    <div class="keyboard-key" data-key="ؤ">ؤ</div>
+                    <div class="keyboard-key" data-key="ر">ر</div>
+                    <div class="keyboard-key" data-key="لا">لا</div>
+                    <div class="keyboard-key" data-key="ى">ى</div>
+                    <div class="keyboard-key" data-key="ة">ة</div>
+                    <div class="keyboard-key" data-key="و">و</div>
+                    <div class="keyboard-key" data-key="ز">ز</div>
+                    <div class="keyboard-key" data-key="ظ">ظ</div>
+                    <div class="keyboard-key special-key" data-key="backspace">⌫</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key special-key" data-key="123">١٢٣</div>
+                    <div class="keyboard-key space-key" data-key=" ">___</div>
+                    <div class="keyboard-key special-key" data-key=".">.</div>
+                    <div class="keyboard-key special-key" data-key="enter">Enter</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-background-medium p-4 text-center text-sm text-light-text mt-auto">
+        <p id="footerText">An AAC communication tool for non-speaking children</p>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeSettingsModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4 text-primary">Settings</h2>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Add New Category</h3>
+                <form id="addCategoryForm" class="flex flex-col gap-3">
+                    <input type="text" id="newCategoryName" placeholder="Category Name (e.g., 'Animals')" class="w-full" required>
+                    <button type="submit" class="bg-blue-500 text-white button">Add Category</button>
+                </form>
+            </div>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Add New Element to Category</h3>
+                <form id="addElementForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryForElement" class="w-full" required>
+                        <option value="">Select Category</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <input type="text" id="newElementText" placeholder="Element Text (e.g., 'Dog')" class="w-full" required>
+                    <input type="text" id="newElementEmoji" placeholder="Emoji (e.g., 🐶)" class="w-full">
+                    <input type="url" id="newElementImageUrl" placeholder="Image URL (optional, e.g., https://example.com/dog.png)" class="w-full">
+                    <button type="submit" class="bg-green-500 text-white button">Add Element</button>
+                </form>
+            </div>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Remove Category</h3>
+                <form id="removeCategoryForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryToRemove" class="w-full" required>
+                        <option value="">Select Category to Remove</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <button type="submit" class="bg-red-500 text-white button">Remove Category</button>
+                </form>
+            </div>
+
+            <div class="p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Remove Element from Category</h3>
+                <form id="removeElementForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryForElementRemoval" class="w-full" required>
+                        <option value="">Select Category</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <select id="selectElementToRemove" class="w-full" required>
+                        <option value="">Select Element to Remove</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <button type="submit" class="bg-red-500 text-white button">Remove Element</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* JavaScript will be inserted here */
+    </script>
+</body>
+</html>
