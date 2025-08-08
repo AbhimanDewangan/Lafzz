@@ -1,0 +1,386 @@
+:root {
+    /* Professional Palette */
+    --primary: #4A90E2; /* Blue */
+    --secondary: #6AABF2; /* Lighter Blue */
+    --accent: #347DCF; /* Darker Blue */
+    --text: #333333; /* Dark Gray */
+    --light-text: #666666; /* Medium Gray */
+    --background-light: #F8F9FA; /* Off-white */
+    --background-medium: #E9ECEF; /* Light Gray */
+    --border-color: #DEE2E6; /* Light Gray Border */
+
+    /* Original background colors */
+    --bg-start: #12c2b6; /* Turquoise */
+    --bg-end: #fffacd;   /* Light Yellow */
+
+    /* Category Colors - more muted and professional */
+    --category-basic: #8E44AD; /* Grape */
+    --category-food: #D35400; /* Pumpkin */
+    --category-activities: #27AE60; /* Emerald */
+    --category-people: #2980B9; /* Belize Hole */
+    --category-feelings: #C0392B; /* Pomegranate */
+    --category-help: #F39C12; /* Orange */ /* New category color */
+
+    --button-bg: #ffffff; /* White */
+    --button-text: var(--text);
+    --button-border: var(--border-color);
+
+    /* Keyboard specific colors */
+    --keyboard-bg: #e0e0e0; /* Light gray for keyboard background */
+    --key-bg: #ffffff; /* White for individual keys */
+    --key-border: #cccccc; /* Gray border for keys */
+    --key-text: #333333; /* Dark text for keys */
+    --special-key-bg: #c0c0c0; /* Lighter gray for special keys */
+    --special-key-hover: #b0b0b0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom right, var(--bg-start), var(--bg-end)); /* Original gradient */
+    color: var(--text);
+    touch-action: manipulation;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.button {
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--button-border);
+}
+
+.button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button:active {
+    transform: scale(0.98);
+    animation: pop 0.1s ease-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.message-area {
+    min-height: 80px;
+    transition: all 0.3s;
+    background-color: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    color: var(--text);
+}
+
+.message-word {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.1s ease-in-out;
+}
+
+.message-word:hover {
+    background-color: var(--accent);
+}
+
+.message-word .delete-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.5rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.message-word .delete-btn:hover {
+    opacity: 1;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+}
+
+.speaking {
+    animation: pulse 1.2s infinite;
+}
+
+.clear-button-shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+.category-btn {
+    background-color: var(--background-medium);
+    color: var(--light-text);
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.category-btn:hover {
+    background-color: var(--background-light);
+    color: var(--text);
+    transform: scale(1.02);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.category-btn.active {
+    background-color: var(--accent);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent);
+}
+
+.communication-button {
+    animation: fadeIn 0.3s ease-out;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border-radius: 0.75rem; /* More rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--button-border);
+    padding: 1rem; /* More padding */
+}
+
+.communication-button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* Darker overlay */
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    width: 95%; /* Keep responsive width */
+    max-width: 450px; /* Reduced max-width for smaller popup */
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+    max-height: 90vh; /* Limit height to prevent full screen */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.close-button {
+    color: #333333; /* Darker color for better visibility */
+    font-size: 32px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1; /* Ensure it doesn't take too much vertical space */
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--primary); /* Change color on hover/focus */
+}
+
+/* Emoji container styling */
+.emoji-container {
+    width: 70px; /* Slightly larger */
+    height: 70px; /* Slightly larger */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 45px; /* Larger emoji size */
+    margin-bottom: 0.5rem;
+    background-color: var(--background-medium); /* Use a background color */
+    border-radius: 0.5rem;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.emoji-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Header emoji styling */
+.header-emoji {
+    width: 45px; /* Slightly larger */
+    height: 45px; /* Slightly larger */
+    background-color: #FFD700;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px; /* Larger emoji */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Form input styling */
+.modal-content input[type="text"],
+.modal-content input[type="url"],
+.modal-content select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 1rem;
+    color: var(--text);
+    background-color: var(--background-light);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="url"]:focus,
+.modal-content select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.modal-content button[type="submit"] {
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-content button[type="submit"].bg-blue-500 {
+    background-color: var(--primary);
+}
+.modal-content button[type="submit"].bg-blue-500:hover {
+    background-color: var(--accent);
+}
+.modal-content button[type="submit"].bg-green-500 {
+    background-color: #28A745; /* Bootstrap success green */
+}
+.modal-content button[type="submit"].bg-green-500:hover {
+    background-color: #218838;
+}
+.modal-content button[type="submit"].bg-red-500 {
+    background-color: #DC3545; /* Bootstrap danger red */
+}
+.modal-content button[type="submit"].bg-red-500:hover {
+    background-color: #C82333;
+}
+
+/* Keyboard Styles */
+.keyboard-container {
+    background-color: var(--keyboard-bg);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    margin-top: 1rem;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.keyboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%; /* Ensure it takes full width of container */
+}
+
+.keyboard-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.keyboard-key {
+    flex-grow: 1;
+    flex-basis: 0; /* Distribute space evenly */
+    background-color: var(--key-bg);
+    border: 1px solid var(--key-border);
+    border-radius: 0.375rem;
+    padding: 0.75rem 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--key-text);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.1s ease-in-out;
+    min-width: 30px; /* Ensure keys are not too small */
+    height: 50px; /* Fixed height for keys */
+}
+
+.keyboard-key:hover {
+    background-color: var(--background-medium);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.keyboard-key:active {
+    background-color: var(--special-key-hover);
+    transform: scale(0.98);
+}
+
+.keyboard-key.special-key {
+    background-color: var(--special-key-bg);
+    font-size: 1rem;
+}
+
+.keyboard-key.special-key:hover {
+    background-color: var(--special-key-hover);
+}
+
+.keyboard-key.space-key {
+    flex-grow: 5; /* Make space bar wider */
+}
+
+/* Scrollbar for category tabs */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
