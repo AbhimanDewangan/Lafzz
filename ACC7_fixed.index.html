@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lafzz - AAC Communication Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Professional Palette */
+            --primary: #4A90E2; /* Blue */
+            --secondary: #6AABF2; /* Lighter Blue */
+            --accent: #347DCF; /* Darker Blue */
+            --text: #333333; /* Dark Gray */
+            --light-text: #666666; /* Medium Gray */
+            --background-light: #F8F9FA; /* Off-white */
+            --background-medium: #E9ECEF; /* Light Gray */
+            --border-color: #DEE2E6; /* Light Gray Border */
+
+            /* Original background colors */
+            --bg-start: #12c2b6; /* Turquoise */
+            --bg-end: #fffacd;   /* Light Yellow */
+
+            /* Category Colors - more muted and professional */
+            --category-basic: #8E44AD; /* Grape */
+            --category-food: #D35400; /* Pumpkin */
+            --category-activities: #27AE60; /* Emerald */
+            --category-people: #2980B9; /* Belize Hole */
+            --category-feelings: #C0392B; /* Pomegranate */
+            --category-help: #F39C12; /* Orange */ /* New category color */
+
+            --button-bg: #ffffff; /* White */
+            --button-text: var(--text);
+            --button-border: var(--border-color);
+
+            /* Keyboard specific colors */
+            --keyboard-bg: #e0e0e0; /* Light gray for keyboard background */
+            --key-bg: #ffffff; /* White for individual keys */
+            --key-border: #cccccc; /* Gray border for keys */
+            --key-text: #333333; /* Dark text for keys */
+            --special-key-bg: #c0c0c0; /* Lighter gray for special keys */
+            --special-key-hover: #b0b0b0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, var(--bg-start), var(--bg-end)); /* Original gradient */
+            color: var(--text);
+            touch-action: manipulation;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .button {
+            transition: all 0.2s ease-in-out;
+            user-select: none;
+            transform: scale(1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--button-border);
+        }
+        
+        .button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button:active {
+            transform: scale(0.98);
+            animation: pop 0.1s ease-out;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        
+        .message-area {
+            min-height: 80px;
+            transition: all 0.3s;
+            background-color: var(--background-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .message-word {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.3rem 0.75rem;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.1s ease-in-out;
+        }
+
+        .message-word:hover {
+            background-color: var(--accent);
+        }
+
+        .message-word .delete-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 0.5rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .message-word .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            50% { transform: translateX(3px); }
+            75% { transform: translateX(-3px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .speaking {
+            animation: pulse 1.2s infinite;
+        }
+
+        .clear-button-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        
+        .category-btn {
+            background-color: var(--background-medium);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .category-btn:hover {
+            background-color: var(--background-light);
+            color: var(--text);
+            transform: scale(1.02);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .category-btn.active {
+            background-color: var(--accent);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent);
+        }
+
+        .communication-button {
+            animation: fadeIn 0.3s ease-out;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border-radius: 0.75rem; /* More rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--button-border);
+            padding: 1rem; /* More padding */
+        }
+
+        .communication-button:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Darker overlay */
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            width: 95%; /* Keep responsive width */
+            max-width: 450px; /* Reduced max-width for smaller popup */
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            max-height: 90vh; /* Limit height to prevent full screen */
+            overflow-y: auto; /* Enable scrolling if content overflows */
+        }
+
+        .close-button {
+            color: #333333; /* Darker color for better visibility */
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1; /* Ensure it doesn't take too much vertical space */
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--primary); /* Change color on hover/focus */
+        }
+
+        /* Emoji container styling */
+        .emoji-container {
+            width: 70px; /* Slightly larger */
+            height: 70px; /* Slightly larger */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px; /* Larger emoji size */
+            margin-bottom: 0.5rem;
+            background-color: var(--background-medium); /* Use a background color */
+            border-radius: 0.5rem;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .emoji-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Header emoji styling */
+        .header-emoji {
+            width: 45px; /* Slightly larger */
+            height: 45px; /* Slightly larger */
+            background-color: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px; /* Larger emoji */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form input styling */
+        .modal-content input[type="text"],
+        .modal-content input[type="url"],
+        .modal-content select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            color: var(--text);
+            background-color: var(--background-light);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .modal-content input[type="text"]:focus,
+        .modal-content input[type="url"]:focus,
+        .modal-content select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+            outline: none;
+        }
+
+        .modal-content button[type="submit"] {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .modal-content button[type="submit"].bg-blue-500 {
+            background-color: var(--primary);
+        }
+        .modal-content button[type="submit"].bg-blue-500:hover {
+            background-color: var(--accent);
+        }
+        .modal-content button[type="submit"].bg-green-500 {
+            background-color: #28A745; /* Bootstrap success green */
+        }
+        .modal-content button[type="submit"].bg-green-500:hover {
+            background-color: #218838;
+        }
+        .modal-content button[type="submit"].bg-red-500 {
+            background-color: #DC3545; /* Bootstrap danger red */
+        }
+        .modal-content button[type="submit"].bg-red-500:hover {
+            background-color: #C82333;
+        }
+
+        /* Keyboard Styles */
+        .keyboard-container {
+            background-color: var(--keyboard-bg);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            margin-top: 1rem;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .keyboard-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%; /* Ensure it takes full width of container */
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .keyboard-key {
+            flex-grow: 1;
+            flex-basis: 0; /* Distribute space evenly */
+            background-color: var(--key-bg);
+            border: 1px solid var(--key-border);
+            border-radius: 0.375rem;
+            padding: 0.75rem 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--key-text);
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.1s ease-in-out;
+            min-width: 30px; /* Ensure keys are not too small */
+            height: 50px; /* Fixed height for keys */
+        }
+
+        .keyboard-key:hover {
+            background-color: var(--background-medium);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .keyboard-key:active {
+            background-color: var(--special-key-hover);
+            transform: scale(0.98);
+        }
+
+        .keyboard-key.special-key {
+            background-color: var(--special-key-bg);
+            font-size: 1rem;
+        }
+
+        .keyboard-key.special-key:hover {
+            background-color: var(--special-key-hover);
+        }
+
+        .keyboard-key.space-key {
+            flex-grow: 5; /* Make space bar wider */
+        }
+
+        /* Scrollbar for category tabs */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-primary text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Lafzz</h1>
+            <div class="flex items-center space-x-4">
+                <select id="languageSelect" class="bg-secondary text-black p-2 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-black">
+                    <option value="en-US">English</option>
+                    <option value="ar-SA">العربية</option>
+                </select>
+                <button id="keyboardToggleBtn" class="bg-secondary hover:bg-accent text-white px-3 py-2 rounded-lg font-medium button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22 5H2C.9 5 0 5.9 0 7v10c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-1 12H3c-.55 0-1-.45-1-1V8c0-.55.45-1 1-1h18c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1zM4 9h2v2H4zm0 3h2v2H4zm3 0h2v2H7zm3 0h2v2h-2zm3 0h2v2h-2zm3 0h2v2h-2zm-9-3h2v2H7zm3 0h2v2h-2zm3 0h2v2h-2z"/>
+                    </svg>
+                </button>
+                <button id="settingsBtn" class="bg-secondary hover:bg-accent text-white px-3 py-2 rounded-lg font-medium button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.16-1.47-1.16-1.85 0L9.19 4.6c-.2.6-.7.9-1.3.9H6.5c-1.1 0-1.6.9-1.6 2v1.5c0 .6-.3 1.1-.9 1.3l-1.4 1.4c-1.16.38-1.16 1.47 0 1.85l1.4 1.4c.6.2.9.7.9 1.3v1.5c0 1.1.9 1.6 2 1.6h1.5c.6 0 1.1.3 1.3.9l1.4 1.4c.38 1.16 1.47 1.16 1.85 0l1.4-1.4c-.2-.6.7-.9 1.3-.9h1.5c1.1 0 1.6-.9 1.6-2v-1.5c0-.6.3-1.1.9-1.3l1.4-1.4c1.16-.38 1.16-1.47 0-1.85l-1.4-1.4c-.6-.2-.9-.7-.9-1.3V6.5c0-1.1-.9-1.6-2-1.6h-1.5c-.6 0-1.1-.3-1.3-.9l-1.4-1.4zM10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div class="header-emoji" role="img" aria-label="Child smiling">😊</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 flex flex-col">
+        <!-- Message Construction Area -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <div class="message-area" id="messageArea"></div>
+            <div class="flex justify-between mt-4">
+                <button onclick="speakMessage()" id="speakBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium button flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="speakBtnText">Speak</span>
+                </button>
+                <button onclick="clearMessage()" id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium button flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="clearBtnText">Clear</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="flex overflow-x-auto pb-2 mb-4 gap-2 scrollbar-hide">
+            <!-- Categories will be dynamically loaded here -->
+            <div id="categoryTabs" class="flex gap-2"></div>
+        </div>
+
+        <!-- Communication Buttons Grid -->
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 flex-grow" id="buttonsGrid">
+            <!-- Buttons will be dynamically loaded here -->
+        </div>
+
+        <!-- On-screen Keyboard -->
+        <div id="keyboardContainer" class="keyboard-container">
+            <!-- English Keyboard -->
+            <div id="englishKeyboard" class="keyboard-layout">
+                <div class="keyboard-row">
+                    <div class="keyboard-key" data-key="q">q</div>
+                    <div class="keyboard-key" data-key="w">w</div>
+                    <div class="keyboard-key" data-key="e">e</div>
+                    <div class="keyboard-key" data-key="r">r</div>
+                    <div class="keyboard-key" data-key="t">t</div>
+                    <div class="keyboard-key" data-key="y">y</div>
+                    <div class="keyboard-key" data-key="u">u</div>
+                    <div class="keyboard-key" data-key="i">i</div>
+                    <div class="keyboard-key" data-key="o">o</div>
+                    <div class="keyboard-key" data-key="p">p</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key" data-key="a">a</div>
+                    <div class="keyboard-key" data-key="s">s</div>
+                    <div class="keyboard-key" data-key="d">d</div>
+                    <div class="keyboard-key" data-key="f">f</div>
+                    <div class="keyboard-key" data-key="g">g</div>
+                    <div class="keyboard-key" data-key="h">h</div>
+                    <div class="keyboard-key" data-key="j">j</div>
+                    <div class="keyboard-key" data-key="k">k</div>
+                    <div class="keyboard-key" data-key="l">l</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key special-key" data-key="shift">⇧</div>
+                    <div class="keyboard-key" data-key="z">z</div>
+                    <div class="keyboard-key" data-key="x">x</div>
+                    <div class="keyboard-key" data-key="c">c</div>
+                    <div class="keyboard-key" data-key="v">v</div>
+                    <div class="keyboard-key" data-key="b">b</div>
+                    <div class="keyboard-key" data-key="n">n</div>
+                    <div class="keyboard-key" data-key="m">m</div>
+                    <div class="keyboard-key special-key" data-key="backspace">⌫</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="keyboard-key special-key" data-key="123">123</div>
+                    <div class="keyboard-key space-key" data-key=" ">___</div>
+                    <div class="keyboard-key special-key" data-key=".">.</div>
+                    <div class="keyboard-key special-key" data-key="enter">Enter</div>
+                </div>
+            </div>
+
+            <!-- Arabic Keyboard -->
+            <div id="arabicKeyboard" class="keyboard-layout" style="display: none;">
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key" data-key="ض">ض</div>
+                    <div class="keyboard-key" data-key="ص">ص</div>
+                    <div class="keyboard-key" data-key="ث">ث</div>
+                    <div class="keyboard-key" data-key="ق">ق</div>
+                    <div class="keyboard-key" data-key="ف">ف</div>
+                    <div class="keyboard-key" data-key="غ">غ</div>
+                    <div class="keyboard-key" data-key="ع">ع</div>
+                    <div class="keyboard-key" data-key="ه">ه</div>
+                    <div class="keyboard-key" data-key="خ">خ</div>
+                    <div class="keyboard-key" data-key="ح">ح</div>
+                    <div class="keyboard-key" data-key="ج">ج</div>
+                    <div class="keyboard-key" data-key="د">د</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key" data-key="ش">ش</div>
+                    <div class="keyboard-key" data-key="س">س</div>
+                    <div class="keyboard-key" data-key="ي">ي</div>
+                    <div class="keyboard-key" data-key="ب">ب</div>
+                    <div class="keyboard-key" data-key="ل">ل</div>
+                    <div class="keyboard-key" data-key="ا">ا</div>
+                    <div class="keyboard-key" data-key="ت">ت</div>
+                    <div class="keyboard-key" data-key="ن">ن</div>
+                    <div class="keyboard-key" data-key="م">م</div>
+                    <div class="keyboard-key" data-key="ك">ك</div>
+                    <div class="keyboard-key" data-key="ط">ط</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key special-key" data-key="shift">⇧</div>
+                    <div class="keyboard-key" data-key="ئ">ئ</div>
+                    <div class="keyboard-key" data-key="ء">ء</div>
+                    <div class="keyboard-key" data-key="ؤ">ؤ</div>
+                    <div class="keyboard-key" data-key="ر">ر</div>
+                    <div class="keyboard-key" data-key="لا">لا</div>
+                    <div class="keyboard-key" data-key="ى">ى</div>
+                    <div class="keyboard-key" data-key="ة">ة</div>
+                    <div class="keyboard-key" data-key="و">و</div>
+                    <div class="keyboard-key" data-key="ز">ز</div>
+                    <div class="keyboard-key" data-key="ظ">ظ</div>
+                    <div class="keyboard-key special-key" data-key="backspace">⌫</div>
+                </div>
+                <div class="keyboard-row" dir="rtl">
+                    <div class="keyboard-key special-key" data-key="123">١٢٣</div>
+                    <div class="keyboard-key space-key" data-key=" ">___</div>
+                    <div class="keyboard-key special-key" data-key=".">.</div>
+                    <div class="keyboard-key special-key" data-key="enter">Enter</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-background-medium p-4 text-center text-sm text-light-text mt-auto">
+        <p id="footerText">An AAC communication tool for non-speaking children</p>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeSettingsModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4 text-primary">Settings</h2>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Add New Category</h3>
+                <form id="addCategoryForm" class="flex flex-col gap-3">
+                    <input type="text" id="newCategoryName" placeholder="Category Name (e.g., 'Animals')" class="w-full" required>
+                    <button type="submit" class="bg-blue-500 text-white button">Add Category</button>
+                </form>
+            </div>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Add New Element to Category</h3>
+                <form id="addElementForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryForElement" class="w-full" required>
+                        <option value="">Select Category</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <input type="text" id="newElementText" placeholder="Element Text (e.g., 'Dog')" class="w-full" required>
+                    <input type="text" id="newElementEmoji" placeholder="Emoji (e.g., 🐶)" class="w-full">
+                    <input type="url" id="newElementImageUrl" placeholder="Image URL (optional, e.g., https://example.com/dog.png)" class="w-full">
+                    <button type="submit" class="bg-green-500 text-white button">Add Element</button>
+                </form>
+            </div>
+
+            <div class="mb-6 p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Remove Category</h3>
+                <form id="removeCategoryForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryToRemove" class="w-full" required>
+                        <option value="">Select Category to Remove</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <button type="submit" class="bg-red-500 text-white button">Remove Category</button>
+                </form>
+            </div>
+
+            <div class="p-4 bg-background-light rounded-lg border border-border-color">
+                <h3 class="text-xl font-semibold mb-3 text-text">Remove Element from Category</h3>
+                <form id="removeElementForm" class="flex flex-col gap-3">
+                    <select id="selectCategoryForElementRemoval" class="w-full" required>
+                        <option value="">Select Category</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <select id="selectElementToRemove" class="w-full" required>
+                        <option value="">Select Element to Remove</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                    <button type="submit" class="bg-red-500 text-white button">Remove Element</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const synth = window.speechSynthesis;
+        let currentMessage = [];
+        let selectedLanguage = 'ar-SA'; // Default language set to Arabic
+        let isShiftActive = false;
+        let isKeyboardVisible = false;
+
+        // Base translations and button data
+        const baseTranslations = {
+            'en-US': {
+                speak: 'Speak',
+                clear: 'Clear',
+                basic: 'Basic',
+                food: 'Food',
+                activities: 'Activities',
+                people: 'People',
+                feelings: 'Feelings',
+                help: 'Help', // New category
+                footer: 'An AAC communication tool for non-speaking children',
+                buttons: {
+                    basic: {
+                        categoryName: 'Basic',
+                        elements: [
+                            { text: "Yes", emoji: "👍", imageUrl: "" },
+                            { text: "No", emoji: "👎", imageUrl: "" },
+                            { text: "Help", emoji: "🆘", imageUrl: "" },
+                            { text: "More", emoji: "➕", imageUrl: "" },
+                            { text: "All done", emoji: "✅", imageUrl: "" },
+                            { text: "Thank you", emoji: "🙏", imageUrl: "" },
+                            { text: "Please", emoji: "🤲", imageUrl: "" },
+                            { text: "Sorry", emoji: "😔", imageUrl: "" },
+                            { text: "Hello", emoji: "👋", imageUrl: "" },
+                            { text: "Goodbye", emoji: "👋", imageUrl: "" },
+                            { text: "Good morning", emoji: "☀️", imageUrl: "" },
+                            { text: "Good night", emoji: "🌙", imageUrl: "" },
+                            { text: "I", emoji: "👤", imageUrl: "" },
+                            { text: "You", emoji: "👉", imageUrl: "" },
+                            { text: "He", emoji: "👨", imageUrl: "" },
+                            { text: "She", emoji: "👩", imageUrl: "" },
+                            { text: "It", emoji: "📦", imageUrl: "" },
+                            { text: "We", emoji: "👥", imageUrl: "" },
+                            { text: "They", emoji: "👫", imageUrl: "" },
+                            { text: "am", emoji: "➡️", imageUrl: "" },
+                            { text: "is", emoji: "➡️", imageUrl: "" },
+                            { text: "are", emoji: "➡️", imageUrl: "" },
+                            { text: "want", emoji: "💖", imageUrl: "" },
+                            { text: "like", emoji: "😊", imageUrl: "" },
+                            { text: "feel", emoji: "🖐️", imageUrl: "" },
+                            { text: "go", emoji: "🚶", imageUrl: "" },
+                            { text: "do", emoji: "✅", imageUrl: "" },
+                            { text: "What", emoji: "❓", imageUrl: "" },
+                            { text: "Where", emoji: "📍", imageUrl: "" },
+                            { text: "When", emoji: "⏰", imageUrl: "" },
+                            { text: "Who", emoji: "🧑", imageUrl: "" },
+                            { text: "Why", emoji: "🤔", imageUrl: "" },
+                            { text: "How", emoji: "🤷‍♀️", imageUrl: "" },
+                            { text: "to", emoji: "➡️", imageUrl: "" },
+                            { text: "a", emoji: "🅰️", imageUrl: "" },
+                            { text: "the", emoji: "📖", imageUrl: "" },
+                            { text: "very", emoji: "⬆️", imageUrl: "" },
+                            { text: "not", emoji: "🚫", imageUrl: "" },
+                            { text: "big", emoji: "⬆️", imageUrl: "" },
+                            { text: "small", emoji: "⬇️", imageUrl: "" },
+                            { text: "hot", emoji: "🔥", imageUrl: "" },
+                            { text: "cold", emoji: "🥶", imageUrl: "" },
+                            { text: "new", emoji: "✨", imageUrl: "" },
+                            { text: "old", emoji: "👴", imageUrl: "" },
+                        ]
+                    },
+                    food: {
+                        categoryName: 'Food',
+                        elements: [
+                            { text: "Water", emoji: "💧", imageUrl: "" },
+                            { text: "Milk", emoji: "🥛", imageUrl: "" },
+                            { text: "Juice", emoji: "🍊", imageUrl: "" },
+                            { text: "Apple", emoji: "🍎", imageUrl: "" },
+                            { text: "Banana", emoji: "🍌", imageUrl: "" },
+                            { text: "Bread", emoji: "🍞", imageUrl: "" },
+                            { text: "Cereal", emoji: "🥣", imageUrl: "" },
+                            { text: "Sandwich", emoji: "🥪", imageUrl: "" },
+                            { text: "Pizza", emoji: "🍕", imageUrl: "" },
+                            { text: "Chicken", emoji: "🍗", imageUrl: "" },
+                            { text: "Fish", emoji: "🐟", imageUrl: "" },
+                            { text: "Rice", emoji: "🍚", imageUrl: "" },
+                            { text: "Pasta", emoji: "🍝", imageUrl: "" },
+                            { text: "Soup", emoji: "🍲", imageUrl: "" },
+                            { text: "Salad", emoji: "🥗", imageUrl: "" },
+                            { text: "Cookie", emoji: "🍪", imageUrl: "" },
+                            { text: "Cake", emoji: "🎂", imageUrl: "" },
+                            { text: "Ice cream", emoji: "🍦", imageUrl: "" },
+                            { text: "Candy", emoji: "🍬", imageUrl: "" },
+                            { text: "Fruit", emoji: "🍓", imageUrl: "" },
+                            { text: "Vegetables", emoji: "🥕", imageUrl: "" },
+                            { text: "Breakfast", emoji: "🍳", imageUrl: "" },
+                            { text: "Lunch", emoji: "🍔", imageUrl: "" },
+                            { text: "Dinner", emoji: "🍽️", imageUrl: "" },
+                            { text: "Snack", emoji: "🥨", imageUrl: "" },
+                            { text: "Meat", emoji: "🥩", imageUrl: "" },
+                            { text: "Cheese", emoji: "🧀", imageUrl: "" },
+                            { text: "Egg", emoji: "🥚", imageUrl: "" },
+                            { text: "Yogurt", emoji: "🍦", imageUrl: "" },
+                            { text: "Coffee", emoji: "☕", imageUrl: "" },
+                            { text: "Tea", emoji: "🍵", imageUrl: "" },
+                        ]
+                    },
+                    activities: {
+                        categoryName: 'Activities',
+                        elements: [
+                            { text: "Read", emoji: "📚", imageUrl: "" },
+                            { text: "Draw", emoji: "🖍️", imageUrl: "" },
+                            { text: "Music", emoji: "🎶", imageUrl: "" },
+                            { text: "TV", emoji: "📺", imageUrl: "" },
+                            { text: "Game", emoji: "🎮", imageUrl: "" },
+                            { text: "Outdoor", emoji: "🌳", imageUrl: "" },
+                            { text: "Nap", emoji: "😴", imageUrl: "" },
+                            { text: "Bath", emoji: "🛁", imageUrl: "" },
+                            { text: "Play", emoji: "🤸", imageUrl: "" },
+                            { text: "Sing", emoji: "🎤", imageUrl: "" },
+                            { text: "Dance", emoji: "💃", imageUrl: "" },
+                            { text: "Walk", emoji: "🚶‍♀️", imageUrl: "" },
+                            { text: "Run", emoji: "🏃", imageUrl: "" },
+                            { text: "Jump", emoji: "🤸‍♂️", imageUrl: "" },
+                            { text: "School", emoji: "🏫", imageUrl: "" },
+                            { text: "Park", emoji: "🏞️", imageUrl: "" },
+                            { text: "Store", emoji: "🏪", imageUrl: "" },
+                            { text: "Zoo", emoji: "🦁", imageUrl: "" },
+                            { text: "Beach", emoji: "🏖️", imageUrl: "" },
+                            { text: "Clean up", emoji: "🧹", imageUrl: "" },
+                            { text: "Help out", emoji: "🤝", imageUrl: "" },
+                            { text: "Color", emoji: "🎨", imageUrl: "" },
+                            { text: "Build", emoji: "🧱", imageUrl: "" },
+                            { text: "Puzzle", emoji: "🧩", imageUrl: "" },
+                            { text: "Tablet", emoji: "📱", imageUrl: "" },
+                            { text: "Computer", emoji: "💻", imageUrl: "" },
+                            { text: "Bike", emoji: "🚲", imageUrl: "" },
+                            { text: "Car ride", emoji: "🚗", imageUrl: "" },
+                            { text: "Bus ride", emoji: "🚌", imageUrl: "" },
+                            { text: "Train ride", emoji: "🚆", imageUrl: "" },
+                        ]
+                    },
+                    people: {
+                        categoryName: 'People',
+                        elements: [
+                            { text: "Mom", emoji: "👩‍👧", imageUrl: "" },
+                            { text: "Dad", emoji: "👨‍👦", imageUrl: "" },
+                            { text: "Teacher", emoji: "🧑‍🏫", imageUrl: "" },
+                            { text: "Friend", emoji: "🤝", imageUrl: "" },
+                            { text: "Doctor", emoji: "🩺", imageUrl: "" },
+                            { text: "Sibling", emoji: "👫", imageUrl: "" },
+                            { text: "Grandma", emoji: "👵", imageUrl: "" },
+                            { text: "Grandpa", emoji: "👴", imageUrl: "" },
+                            { text: "Aunt", emoji: "👩‍🦰", imageUrl: "" },
+                            { text: "Uncle", emoji: "👨‍🦱", imageUrl: "" },
+                            { text: "Nurse", emoji: "👩‍⚕️", imageUrl: "" },
+                            { text: "Therapist", emoji: "🧑‍⚕️", imageUrl: "" },
+                            { text: "Babysitter", emoji: "👶", imageUrl: "" },
+                            { text: "Neighbor", emoji: "🏡", imageUrl: "" },
+                            { text: "Boy", emoji: "👦", imageUrl: "" },
+                            { text: "Girl", emoji: "👧", imageUrl: "" },
+                            { text: "Man", emoji: "👨", imageUrl: "" },
+                            { text: "Woman", emoji: "👩", imageUrl: "" },
+                            { text: "Baby", emoji: "👶", imageUrl: "" },
+                            { text: "Child", emoji: "🧒", imageUrl: "" },
+                            { text: "Adult", emoji: "🧑", imageUrl: "" },
+                            { text: "Family", emoji: "👨‍👩‍👧‍👦", imageUrl: "" },
+                            { text: "Stranger", emoji: "👤", imageUrl: "" },
+                            { text: "Police Officer", emoji: "👮‍♂️", imageUrl: "" },
+                            { text: "Firefighter", emoji: "👨‍🚒", imageUrl: "" },
+                        ]
+                    },
+                    feelings: {
+                        categoryName: 'Feelings',
+                        elements: [
+                            { text: "Happy", emoji: "😊", imageUrl: "" },
+                            { text: "Sad", emoji: "😢", imageUrl: "" },
+                            { text: "Angry", "emoji": "😡", imageUrl: "" },
+                            { text: "Tired", emoji: "😩", imageUrl: "" },
+                            { text: "Hungry", emoji: "😋", imageUrl: "" },
+                            { text: "Hurt", emoji: "🤕", imageUrl: "" },
+                            { text: "Scared", emoji: "😨", imageUrl: "" },
+                            { text: "Love", emoji: "❤️", imageUrl: "" },
+                            { text: "Excited", emoji: "🤩", imageUrl: "" },
+                            { text: "Bored", emoji: "😑", imageUrl: "" },
+                            { text: "Confused", emoji: "😕", imageUrl: "" },
+                            { text: "Proud", emoji: "😌", imageUrl: "" },
+                            { text: "Shy", emoji: "🫣", imageUrl: "" },
+                            { text: "Surprised", emoji: "😲", imageUrl: "" },
+                            { text: "Frustrated", emoji: "😤", imageUrl: "" },
+                            { text: "Calm", emoji: "😌", imageUrl: "" },
+                            { text: "Worried", emoji: "😟", imageUrl: "" },
+                            { text: "Lonely", emoji: "😔", imageUrl: "" },
+                            { text: "Annoyed", emoji: "😒", imageUrl: "" },
+                            { text: "Grateful", emoji: "🙏", imageUrl: "" },
+                            { text: "Hopeful", emoji: "✨", imageUrl: "" },
+                            { text: "Jealous", emoji: "😠", imageUrl: "" },
+                            { text: "Silly", emoji: "🤪", imageUrl: "" },
+                            { text: "Sleepy", emoji: "😴", imageUrl: "" },
+                            { text: "Stressed", emoji: "😫", imageUrl: "" },
+                            { text: "Thankful", emoji: "😊", imageUrl: "" },
+                        ]
+                    },
+                    help: { // New 'Help' category
+                        categoryName: 'Help',
+                        elements: [
+                            { text: "Emergency", emoji: "🚨", imageUrl: "" },
+                            { text: "I am Hurt", emoji: "🤕", imageUrl: "" },
+                            { text: "Tired", emoji: "😴", imageUrl: "" },
+                            { text: "Medicine", emoji: "💊", imageUrl: "" },
+                            { text: "Bandage", emoji: "🩹", imageUrl: "" },
+                            { text: "Toilet", emoji: "🚽", imageUrl: "" },
+                            { text: "Danger", emoji: "⚠️", imageUrl: "" },
+                            { text: "Thirsty", emoji: "💧", imageUrl: "" },
+                            { text: "Sick", emoji: "🤢", imageUrl: "" },
+                            { text: "Cold", emoji: "🥶", imageUrl: "" },
+                            { text: "Hot", emoji: "🥵", imageUrl: "" },
+                            { text: "Lost", emoji: "🗺️", imageUrl: "" },
+                            { text: "Need help", emoji: "🙏", imageUrl: "" },
+                            { text: "Call someone", emoji: "📞", imageUrl: "" },
+                            { text: "Doctor", emoji: "👨‍⚕️", imageUrl: "" },
+                            { text: "Nurse", emoji: "👩‍⚕️", imageUrl: "" },
+                            { text: "Police", emoji: "🚓", imageUrl: "" },
+                            { text: "Fire", emoji: "🚒", imageUrl: "" },
+                            { text: "Ambulance", emoji: "🚑", imageUrl: "" },
+                            { text: "Pain", emoji: "😖", imageUrl: "" },
+                            { text: "Headache", emoji: "🤯", imageUrl: "" },
+                            { text: "Stomach ache", emoji: "🤢", imageUrl: "" },
+                            { text: "Fever", emoji: "🤒", imageUrl: "" },
+                            { text: "Dizzy", emoji: "💫", imageUrl: "" },
+                            { text: "Scared", emoji: "😨", imageUrl: "" },
+                            { text: "Broken", emoji: "💔", imageUrl: "" },
+                            { text: "Fix it", emoji: "🔧", imageUrl: "" },
+                            { text: "Quiet", emoji: "🤫", imageUrl: "" },
+                            { text: "Loud", emoji: "🔊", imageUrl: "" },
+                            { text: "Light", emoji: "💡", imageUrl: "" },
+                            { text: "Dark", emoji: "⚫", imageUrl: "" },
+                            { text: "Clean", emoji: "🧼", imageUrl: "" },
+                            { text: "Dirty", emoji: " 🤮", imageUrl: "" },
+                            { text: "Wet", emoji: "💧", imageUrl: "" },
+                            { text: "Dry", emoji: "☀️", imageUrl: "" },
+                        ]
+                    }
+                }
+            },
+            'ar-SA': {
+                speak: 'تكلم',
+                clear: 'مسح',
+                basic: 'أساسي',
+                food: 'طعام',
+                activities: 'أنشطة',
+                people: 'أشخاص',
+                feelings: 'مشاعر',
+                help: 'مساعدة', // New category
+                footer: 'أداة تواصل AAC للأطفال غير الناطقين',
+                buttons: {
+                    basic: {
+                        categoryName: 'أساسي',
+                        elements: [
+                            { text: "نعم", emoji: "👍", imageUrl: "" },
+                            { text: "لا", emoji: "👎", imageUrl: "" },
+                            { text: "مساعدة", emoji: "🆘", imageUrl: "" },
+                            { text: "المزيد", emoji: "➕", imageUrl: "" },
+                            { text: "انتهيت", emoji: "✅", imageUrl: "" },
+                            { text: "شكرا لك", emoji: "🙏", imageUrl: "" },
+                            { text: "من فضلك", emoji: "🤲", imageUrl: "" },
+                            { text: "آسف", emoji: "😔", imageUrl: "" },
+                            { text: "مرحبا", emoji: "👋", imageUrl: "" },
+                            { text: "مع السلامة", emoji: "👋", imageUrl: "" },
+                            { text: "صباح الخير", emoji: "☀️", imageUrl: "" },
+                            { text: "تصبح على خير", emoji: "🌙", imageUrl: "" },
+                            { text: "أنا", emoji: "👤", imageUrl: "" },
+                            { text: "أنت", emoji: "👉", imageUrl: "" },
+                            { text: "هو", emoji: "👨", imageUrl: "" },
+                            { text: "هي", emoji: "👩", imageUrl: "" },
+                            { text: "هو/هي (لغير العاقل)", emoji: "📦", imageUrl: "" },
+                            { text: "نحن", emoji: "👥", imageUrl: "" },
+                            { text: "هم", emoji: "👫", imageUrl: "" },
+                            { text: "أكون", emoji: "➡️", imageUrl: "" },
+                            { text: "يكون", emoji: "➡️", imageUrl: "" },
+                            { text: "يكونون", emoji: "➡️", imageUrl: "" },
+                            { text: "أريد", emoji: "💖", imageUrl: "" },
+                            { text: "أحب", emoji: "😊", imageUrl: "" },
+                            { text: "أشعر", emoji: "🖐️", imageUrl: "" },
+                            { text: "أذهب", emoji: "🚶", imageUrl: "" },
+                            { text: "أفعل", emoji: "✅", imageUrl: "" },
+                            { text: "ماذا", emoji: "❓", imageUrl: "" },
+                            { text: "أين", emoji: "📍", imageUrl: "" },
+                            { text: "متى", emoji: "⏰", imageUrl: "" },
+                            { text: "من", emoji: "🧑", imageUrl: "" },
+                            { text: "لماذا", emoji: "🤔", imageUrl: "" },
+                            { text: "كيف", emoji: "🤷‍♀️", imageUrl: "" },
+                            { text: "إلى", emoji: "➡️", imageUrl: "" },
+                            { text: "أداة تعريف", emoji: "🅰️", imageUrl: "" },
+                            { text: "الـ", emoji: "📖", imageUrl: "" },
+                            { text: "جدا", emoji: "⬆️", imageUrl: "" },
+                            { text: "لا", emoji: "🚫", imageUrl: "" },
+                            { text: "كبير", emoji: "⬆️", imageUrl: "" },
+                            { text: "صغير", emoji: "⬇️", imageUrl: "" },
+                            { text: "حار", emoji: "🔥", imageUrl: "" },
+                            { text: "بارد", emoji: "🥶", imageUrl: "" },
+                            { text: "جديد", emoji: "✨", imageUrl: "" },
+                            { text: "قديم", emoji: "👴", imageUrl: "" },
+                        ]
+                    },
+                    food: {
+                        categoryName: 'طعام',
+                        elements: [
+                            { text: "ماء", emoji: "💧", imageUrl: "" },
+                            { text: "حليب", emoji: "🥛", imageUrl: "" },
+                            { text: "عصير", emoji: "🍊", imageUrl: "" },
+                            { text: "تفاح", emoji: "🍎", imageUrl: "" },
+                            { text: "موز", emoji: "🍌", imageUrl: "" },
+                            { text: "خبز", emoji: "🍞", imageUrl: "" },
+                            { text: "حبوب", emoji: "🥣", imageUrl: "" },
+                            { text: "ساندويتش", emoji: "🥪", imageUrl: "" },
+                            { text: "بيتزا", emoji: "🍕", imageUrl: "" },
+                            { text: "دجاج", emoji: "🍗", imageUrl: "" },
+                            { text: "سمك", emoji: "🐟", imageUrl: "" },
+                            { text: "أرز", emoji: "🍚", imageUrl: "" },
+                            { text: "معكرونة", emoji: "🍝", imageUrl: "" },
+                            { text: "شوربة", emoji: "🍲", imageUrl: "" },
+                            { text: "سلطة", emoji: "🥗", imageUrl: "" },
+                            { text: "كعكة", emoji: "🍪", imageUrl: "" },
+                            { text: "كيك", emoji: "🎂", imageUrl: "" },
+                            { text: "آيس كريم", emoji: "🍦", imageUrl: "" },
+                            { text: "حلوى", emoji: "🍬", imageUrl: "" },
+                            { text: "فاكهة", emoji: "🍓", imageUrl: "" },
+                            { text: "خضروات", emoji: "🥕", imageUrl: "" },
+                            { text: "فطور", emoji: "🍳", imageUrl: "" },
+                            { text: "غداء", emoji: "🍔", imageUrl: "" },
+                            { text: "عشاء", emoji: "🍽️", imageUrl: "" },
+                            { text: "وجبة خفيفة", emoji: "🥨", imageUrl: "" },
+                            { text: "لحم", emoji: "🥩", imageUrl: "" },
+                            { text: "جبن", emoji: "🧀", imageUrl: "" },
+                            { text: "بيضة", emoji: "🥚", imageUrl: "" },
+                            { text: "زبادي", emoji: "🍦", imageUrl: "" },
+                            { text: "قهوة", emoji: "☕", imageUrl: "" },
+                            { text: "شاي", emoji: "🍵", imageUrl: "" },
+                        ]
+                    },
+                    activities: {
+                        categoryName: 'أنشطة',
+                        elements: [
+                            { text: "قراءة", emoji: "📚", imageUrl: "" },
+                            { text: "رسم", emoji: "🖍️", imageUrl: "" },
+                            { text: "موسيقى", emoji: "🎶", imageUrl: "" },
+                            { text: "تلفاز", emoji: "📺", imageUrl: "" },
+                            { text: "لعبة", emoji: "🎮", imageUrl: "" },
+                            { text: "خارج المنزل", emoji: "🌳", imageUrl: "" },
+                            { text: "قيلولة", emoji: "😴", imageUrl: "" },
+                            { text: "استحمام", emoji: "🛁", imageUrl: "" },
+                            { text: "لعب", emoji: "🤸", imageUrl: "" },
+                            { text: "غناء", emoji: "🎤", imageUrl: "" },
+                            { text: "رقص", emoji: "💃", imageUrl: "" },
+                            { text: "مشي", emoji: "🚶‍♀️", imageUrl: "" },
+                            { text: "جري", emoji: "🏃", imageUrl: "" },
+                            { text: "قفز", emoji: "🤸‍♂️", imageUrl: "" },
+                            { text: "مدرسة", emoji: "🏫", imageUrl: "" },
+                            { text: "حديقة", emoji: "🏞️", imageUrl: "" },
+                            { text: "متجر", emoji: "🏪", imageUrl: "" },
+                            { text: "حديقة حيوان", emoji: "🦁", imageUrl: "" },
+                            { text: "شاطئ", emoji: "🏖️", imageUrl: "" },
+                            { text: "تنظيف", emoji: "🧹", imageUrl: "" },
+                            { text: "مساعدة", emoji: "🤝", imageUrl: "" },
+                            { text: "تلوين", emoji: "🎨", imageUrl: "" },
+                            { text: "بناء", emoji: "🧱", imageUrl: "" },
+                            { text: "لغز", emoji: "🧩", imageUrl: "" },
+                            { text: "جهاز لوحي", emoji: "📱", imageUrl: "" },
+                            { text: "كمبيوتر", emoji: "💻", imageUrl: "" },
+                            { text: "دراجة", emoji: "🚲", imageUrl: "" },
+                            { text: "ركوب السيارة", emoji: "🚗", imageUrl: "" },
+                            { text: "ركوب الحافلة", emoji: "🚌", imageUrl: "" },
+                            { text: "ركوب القطار", emoji: "🚆", imageUrl: "" },
+                        ]
+                    },
+                    people: {
+                        categoryName: 'أشخاص',
+                        elements: [
+                            { text: "أمي", emoji: "👩‍👧", imageUrl: "" },
+                            { text: "أبي", emoji: "👨‍👦", imageUrl: "" },
+                            { text: "معلم", emoji: "🧑‍🏫", imageUrl: "" },
+                            { text: "صديق", emoji: "🤝", imageUrl: "" },
+                            { text: "طبيب", emoji: "🩺", imageUrl: "" },
+                            { text: "أخ/أخت", emoji: "👫", imageUrl: "" },
+                            { text: "جدة", emoji: "👵", imageUrl: "" },
+                            { text: "جد", emoji: "👴", imageUrl: "" },
+                            { text: "عمة/خالة", emoji: "👩‍🦰", imageUrl: "" },
+                            { text: "عم/خال", emoji: "👨‍🦱", imageUrl: "" },
+                            { text: "ممرضة", emoji: "👩‍⚕️", imageUrl: "" },
+                            { text: "معالج", emoji: "🧑‍⚕️", imageUrl: "" },
+                            { text: "جليسة أطفال", emoji: "👶", imageUrl: "" },
+                            { text: "جار", emoji: "🏡", imageUrl: "" },
+                            { text: "ولد", emoji: "👦", imageUrl: "" },
+                            { text: "بنت", emoji: "👧", imageUrl: "" },
+                            { text: "رجل", emoji: "👨", imageUrl: "" },
+                            { text: "امرأة", emoji: "👩", imageUrl: "" },
+                            { text: "طفل رضيع", emoji: "👶", imageUrl: "" },
+                            { text: "طفل", emoji: "🧒", imageUrl: "" },
+                            { text: "بالغ", emoji: "🧑", imageUrl: "" },
+                            { text: "عائلة", emoji: "👨‍👩‍👧‍👦", imageUrl: "" },
+                            { text: "غريب", emoji: "👤", imageUrl: "" },
+                            { text: "ضابط شرطة", emoji: "👮‍♂️", imageUrl: "" },
+                            { text: "رجل إطفاء", emoji: "👨‍🚒", imageUrl: "" },
+                        ]
+                    },
+                    feelings: {
+                        categoryName: 'مشاعر',
+                        elements: [
+                            { text: "سعيد", emoji: "😊", imageUrl: "" },
+                            { text: "حزين", emoji: "😢", imageUrl: "" },
+                            { text: "غاضب", emoji: "😡", imageUrl: "" },
+                            { text: "متعب", emoji: "😩", imageUrl: "" },
+                            { text: "جائع", emoji: "😋", imageUrl: "" },
+                            { text: "متألم", emoji: "🤕", imageUrl: "" },
+                            { text: "خائف", emoji: "😨", imageUrl: "" },
+                            { text: "حب", emoji: "❤️", imageUrl: "" },
+                            { text: "متحمس", emoji: "🤩", imageUrl: "" },
+                            { text: "ملل", emoji: "😑", imageUrl: "" },
+                            { text: "مرتبك", emoji: "😕", imageUrl: "" },
+                            { text: "فخور", emoji: "😌", imageUrl: "" },
+                            { text: "خجول", emoji: "🫣", imageUrl: "" },
+                            { text: "متفاجئ", emoji: "😲", imageUrl: "" },
+                            { text: "محبط", emoji: "😤", imageUrl: "" },
+                            { text: "هادئ", emoji: "😌", imageUrl: "" },
+                            { text: "قلق", emoji: "😟", imageUrl: "" },
+                            { text: "وحيد", emoji: "😔", imageUrl: "" },
+                            { text: "منزعج", emoji: "😒", imageUrl: "" },
+                            { text: "ممتن", emoji: "🙏", imageUrl: "" },
+                            { text: "متفائل", emoji: "✨", imageUrl: "" },
+                            { text: "غيور", emoji: "😠", imageUrl: "" },
+                            { text: "أحمق", emoji: "🤪", imageUrl: "" },
+                            { text: "نعسان", emoji: "😴", imageUrl: "" },
+                            { text: "مجهد", emoji: "😫", imageUrl: "" },
+                            { text: "شاكر", emoji: "😊", imageUrl: "" },
+                        ]
+                    },
+                    help: { // New 'Help' category
+                        categoryName: 'مساعدة',
+                        elements: [
+                            { text: "طوارئ", emoji: "🚨", imageUrl: "" },
+                            { text: "أنا مصاب", emoji: "🤕", imageUrl: "" },
+                            { text: "متعب", emoji: "😴", imageUrl: "" },
+                            { text: "دواء", emoji: "💊", imageUrl: "" },
+                            { text: "ضمادة", emoji: "🩹", imageUrl: "" },
+                            { text: "مرحاض", emoji: "🚽", imageUrl: "" },
+                            { text: "خطر", emoji: "⚠️", imageUrl: "" },
+                            { text: "عطشان", emoji: "💧", imageUrl: "" },
+                            { text: "مريض", emoji: "🤢", imageUrl: "" },
+                            { text: "بردان", emoji: "🥶", imageUrl: "" },
+                            { text: "حران", emoji: "🥵", imageUrl: "" },
+                            { text: "ضائع", emoji: "🗺️", imageUrl: "" },
+                            { text: "أحتاج مساعدة", emoji: "🙏", imageUrl: "" },
+                            { text: "اتصل بشخص", emoji: "📞", imageUrl: "" },
+                            { text: "طبيب", emoji: "👨‍⚕️", imageUrl: "" },
+                            { text: "ممرضة", emoji: "👩‍⚕️", imageUrl: "" },
+                            { text: "شرطة", emoji: "🚓", imageUrl: "" },
+                            { text: "حريق", emoji: "🚒", imageUrl: "" },
+                            { text: "إسعاف", emoji: "🚑", imageUrl: "" },
+                            { text: "ألم", emoji: "😖", imageUrl: "" },
+                            { text: "صداع", emoji: "🤯", imageUrl: "" },
+                            { text: "ألم بطن", emoji: "🤢", imageUrl: "" },
+                            { text: "حمى", emoji: "🤒", imageUrl: "" },
+                            { text: "دوار", emoji: "💫", imageUrl: "" },
+                            { text: "خائف", emoji: "😨", imageUrl: "" },
+                            { text: "مكسور", emoji: "💔", imageUrl: "" },
+                            { text: "أصلحها", emoji: "🔧", imageUrl: "" },
+                            { text: "هادئ", emoji: "🤫", imageUrl: "" },
+                            { text: "صاخب", emoji: "🔊", imageUrl: "" },
+                            { text: "ضوء", emoji: "💡", imageUrl: "" },
+                            { text: "ظلام", emoji: " ⚫", imageUrl: "" },
+                            { text: "نظيف", emoji: "🧼", imageUrl: "" },
+                            { text: "متسخ", emoji: "🤮", imageUrl: "" },
+                            { text: "مبلل", emoji: "💧", imageUrl: "" },
+                            { text: "جاف", emoji: "☀️", imageUrl: "" },
+                        ]
+                    }
+                }
+            }
+        };
+
+        let translations = {}; // This will be populated from localStorage or baseTranslations
+
+        let currentButtonsData = {}; // This will be populated based on selectedLanguage
+
+        // Function to load data from localStorage or use base data
+        function loadData() {
+            const savedTranslations = localStorage.getItem('aacTranslations');
+            if (savedTranslations) {
+                translations = JSON.parse(savedTranslations);
+            } else {
+                translations = JSON.parse(JSON.stringify(baseTranslations)); // Deep copy
+            }
+        }
+
+        // Function to save data to localStorage
+        function saveData() {
+            localStorage.setItem('aacTranslations', JSON.stringify(translations));
+        }
+
+        // Function to find a suitable kid's voice for native SpeechSynthesis
+        function getKidVoice(lang) {
+            const voices = synth.getVoices();
+            const lowerCaseLang = lang.toLowerCase();
+            console.log(`Attempting to find voice for language: ${lang}`);
+            console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+
+            // Keywords to look for in voice names for a kid's voice
+            const kidKeywords = ['child', 'kid', 'boy', 'girl', 'junior', 'young'];
+
+            // 1. Try to find a kid's voice for the exact language code (e.g., 'ar-SA')
+            let targetVoices = voices.filter(voice => voice.lang.toLowerCase() === lowerCaseLang);
+            for (const keyword of kidKeywords) {
+                const foundVoice = targetVoices.find(voice => voice.name.toLowerCase().includes(keyword));
+                if (foundVoice) {
+                    console.log(`Found kid voice for exact lang (${lang}): ${foundVoice.name}`);
+                    return foundVoice;
+                }
+            }
+
+            // 2. If no kid's voice, try to find any voice for the exact language code
+            if (targetVoices.length > 0) {
+                console.log(`No kid voice found for exact lang (${lang}), using first available voice for exact lang: ${targetVoices[0].name}`);
+                return targetVoices[0];
+            }
+
+            // 3. If no voices for exact language code, try to find a kid's voice for the broader language (e.g., 'ar' for any Arabic dialect)
+            targetVoices = voices.filter(voice => voice.lang.toLowerCase().startsWith(lowerCaseLang.substring(0, 2)));
+            for (const keyword of kidKeywords) {
+                const foundVoice = targetVoices.find(voice => voice.name.toLowerCase().includes(keyword));
+                if (foundVoice) {
+                    console.log(`Found kid voice for broad lang (${lang.substring(0, 2)}): ${foundVoice.name}`);
+                    return foundVoice;
+                }
+            }
+
+            // 4. If no kid's voice for broader language, try to find any voice for the broader language
+            if (targetVoices.length > 0) {
+                console.log(`No kid voice found for broad lang (${lang.substring(0, 2)}), using first available voice for broad lang: ${targetVoices[0].name}`);
+                return targetVoices[0];
+            }
+
+            // 5. Fallback to the very first voice available in the system
+            if (voices.length > 0) {
+                console.log('No specific or broad language voices found, using default system voice:', voices[0].name);
+                return voices[0];
+            }
+
+            console.log('No voices available at all in the system.');
+            return null; // No voices available
+        }
+
+
+        // Update UI text based on selected language
+        function updateUIText() {
+            const currentTranslation = translations[selectedLanguage];
+            document.getElementById('speakBtnText').textContent = currentTranslation.speak;
+            document.getElementById('clearBtnText').textContent = currentTranslation.clear;
+            document.getElementById('footerText').textContent = currentTranslation.footer;
+
+            // Update category button texts
+            const categoryTabs = document.getElementById('categoryTabs');
+            categoryTabs.innerHTML = ''; // Clear existing tabs
+            let firstCategoryKey = null;
+
+            for (const categoryKey in currentTranslation.buttons) {
+                if (currentTranslation.buttons.hasOwnProperty(categoryKey)) {
+                    if (firstCategoryKey === null) {
+                        firstCategoryKey = categoryKey;
+                    }
+                    const categoryData = currentTranslation.buttons[categoryKey];
+                    const categoryDisplayName = categoryData.categoryName || categoryKey; // Use categoryName from object
+
+                    const btn = document.createElement('button');
+                    btn.onclick = () => showCategory(categoryKey);
+                    btn.className = `category-btn whitespace-nowrap px-4 py-2 rounded-full font-medium button`;
+                    
+                    // Assign a specific color for new categories, or use predefined for base ones
+                    let categoryColor = '';
+                    let textColor = 'white'; // Default text color for category buttons
+                    switch(categoryKey) {
+                        case 'basic': categoryColor = 'var(--category-basic)'; break;
+                        case 'food': categoryColor = 'var(--category-food)'; break;
+                        case 'activities': categoryColor = 'var(--category-activities)'; break;
+                        case 'people': categoryColor = 'var(--category-people)'; break;
+                        case 'feelings': categoryColor = 'var(--category-feelings)'; break;
+                        case 'help': categoryColor = 'var(--category-help)'; break; // New category color
+                        default: 
+                            // Generate a consistent color for custom categories based on their key
+                            const hash = categoryKey.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+                            const hue = Math.abs(hash) % 360;
+                            categoryColor = `hsl(${hue}, 70%, 60%)`; 
+                            textColor = 'white'; // Ensure custom categories have white text
+                    }
+                    btn.style.backgroundColor = categoryColor;
+                    btn.style.color = textColor; 
+                    btn.innerHTML = `<span>${categoryDisplayName}</span>`;
+                    categoryTabs.appendChild(btn);
+                }
+            }
+            // Re-activate the current category or the first one if none active
+            const activeCategoryBtn = document.querySelector('.category-btn.active');
+            if (activeCategoryBtn) {
+                const currentActiveCategoryKey = activeCategoryBtn.onclick.toString().match(/'([^']+)'/)[1];
+                showCategory(currentActiveCategoryKey);
+            } else if (firstCategoryKey) {
+                showCategory(firstCategoryKey);
+            }
+        }
+
+        // Function to initialize the app after voices are loaded
+        function initializeApp() {
+    if (window._lafzzInitialized) return;
+    window._lafzzInitialized = true;
+            loadData(); // Load data from localStorage
+            // Set initial language based on browser or default to Arabic
+            selectedLanguage = 'ar-SA'; // Set Arabic as primary language
+            document.getElementById('languageSelect').value = 'ar-SA';
+            
+            currentButtonsData = translations[selectedLanguage].buttons;
+            updateUIText();
+            showCategory(Object.keys(currentButtonsData)[0] || 'basic'); // Show first category or basic
+            updateKeyboardLayout(); // Show the correct keyboard on load
+
+            // Add event listener for language selection
+            document.getElementById('languageSelect').addEventListener('change', (event) => {
+                selectedLanguage = event.target.value;
+                currentButtonsData = translations[selectedLanguage].buttons;
+                updateUIText();
+                // Get the currently active category button and re-show its category
+                const activeCategoryBtn = document.querySelector('.category-btn.active');
+                if (activeCategoryBtn) {
+                    const currentActiveCategoryKey = activeCategoryBtn.onclick.toString().match(/'([^']+)'/)[1];
+                    showCategory(currentActiveCategoryKey);
+                } else {
+                    showCategory(Object.keys(currentButtonsData)[0] || 'basic'); // Fallback to first category or basic
+                }
+                updateKeyboardLayout(); // Update keyboard when language changes
+            });
+
+            // Settings Modal Event Listeners
+            document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+            document.getElementById('addCategoryForm').addEventListener('submit', addCategory);
+            document.getElementById('addElementForm').addEventListener('submit', addElement);
+            document.getElementById('removeCategoryForm').addEventListener('submit', removeCategory);
+            document.getElementById('removeElementForm').addEventListener('submit', removeElement);
+
+            // Event listener for category selection in element removal form
+            document.getElementById('selectCategoryForElementRemoval').addEventListener('change', populateElementSelectForRemoval);
+
+            // Keyboard Event Listener
+            document.getElementById('keyboardToggleBtn').addEventListener('click', toggleKeyboard);
+            // Attach event listeners to all keyboard keys
+            document.querySelectorAll('.keyboard-key').forEach(key => {
+                key.addEventListener('click', handleKeyboardInput);
+            });
+        }
+
+        // Listen for voiceschanged event to ensure voices are loaded
+        // Robust init for WebViews and browsers
+if (typeof window._lafzzInitialized === 'undefined') {
+    window._lafzzInitialized = false;
+}
+function safeInit() {
+    if (window._lafzzInitialized) return;
+    try {
+        initializeApp();
+        window._lafzzInitialized = true;
+    } catch (err) {
+        console.error('initializeApp() failed:', err);
+    }
+}
+// Always init immediately so UI builds even if voiceschanged never fires
+safeInit();
+// Still listen for voiceschanged to update voices later
+if (typeof window.speechSynthesis !== 'undefined' && 'onvoiceschanged' in window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = function () {
+        console.log('speechSynthesis.onvoiceschanged fired — voices available');
+    };
+}
+
+
+        // Show buttons for selected category
+        function showCategory(category) {
+            // Update active tab
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const targetBtn = document.querySelector(`button[onclick="showCategory('${category}')"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+            
+            // Load buttons for the category
+            const grid = document.getElementById('buttonsGrid');
+            grid.innerHTML = '';
+            
+            const categoryData = currentButtonsData[category]; // Get the category object
+            if (categoryData && categoryData.elements) { // Check if elements array exists
+                categoryData.elements.forEach(button => {
+                    const btn = document.createElement('div');
+                    btn.className = 'bg-white rounded-xl shadow-md p-3 flex flex-col items-center justify-center button cursor-pointer communication-button';
+                    btn.onclick = () => addToMessage(button.text); // Add plain text to message
+                    
+                    // Create emoji container or image
+                    const visualContainer = document.createElement('div');
+                    visualContainer.className = 'emoji-container'; // Apply styling for centering emoji
+
+                    if (button.emoji) {
+                        visualContainer.textContent = button.emoji; // Display emoji directly
+                    } else if (button.imageUrl) {
+                        const img = document.createElement('img');
+                        img.src = button.imageUrl;
+                        img.alt = button.text;
+                        img.className = 'h-full w-full object-contain'; // Make image fill container
+                        visualContainer.appendChild(img);
+                    } else {
+                        visualContainer.textContent = '❓'; // Fallback if no emoji or image
+                    }
+                    
+                    // Button text (plain text)
+                    const text = document.createElement('span');
+                    text.className = 'text-sm font-medium text-center mt-1'; /* Added margin-top */
+                    text.textContent = button.text; 
+                    
+                    btn.appendChild(visualContainer);
+                    btn.appendChild(text);
+                    grid.appendChild(btn);
+                });
+            }
+        }
+
+        // Add word to message
+        function addToMessage(word) {
+            currentMessage.push(word);
+            updateMessageArea();
+        }
+
+        // Update the message area display
+        function updateMessageArea() {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = '';
+            
+            currentMessage.forEach((word, index) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'message-word'; // Use new class for styling
+                wordSpan.textContent = word;
+                
+                // Add delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.className = 'delete-btn'; // Use new class for styling
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    currentMessage.splice(index, 1);
+                    updateMessageArea();
+                };
+                
+                wordSpan.appendChild(deleteBtn);
+                messageArea.appendChild(wordSpan);
+            });
+        }
+
+        // Speak the current message
+        function speakMessage() {
+            if (currentMessage.length === 0) return;
+            
+            const messageToSpeak = currentMessage.join(' ');
+            const speakBtn = document.getElementById('speakBtn');
+
+            speakBtn.classList.add('speaking'); // Start speaking animation
+
+            if (selectedLanguage === 'ar-SA') {
+                // Use Google Translate TTS for Arabic
+                const audio = new Audio();
+                audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(messageToSpeak)}&tl=ar&client=tw-ob`;
+                audio.playbackRate = 0.9; // Slightly slower for clarity
+                audio.play().catch(e => {
+                    console.error('Error playing Arabic audio:', e);
+                    alert('Could not play Arabic audio. Please check your internet connection or browser settings.');
+                    speakBtn.classList.remove('speaking');
+                });
+                audio.onended = () => {
+                    speakBtn.classList.remove('speaking');
+                };
+                audio.onerror = () => {
+                    speakBtn.classList.remove('speaking');
+                };
+
+            } else {
+                // Use native SpeechSynthesis for other languages (e.g., English)
+                const utterance = new SpeechSynthesisUtterance(messageToSpeak);
+                utterance.lang = selectedLanguage;
+                utterance.voice = getKidVoice(selectedLanguage);
+                
+                utterance.onend = function() {
+                    speakBtn.classList.remove('speaking');
+                };
+                
+                utterance.onerror = function(event) {
+                    console.error('SpeechSynthesisUtterance.onerror', event);
+                    speakBtn.classList.remove('speaking');
+                    alert('Speech synthesis error: ' + event.error + '. Please ensure your browser supports speech synthesis and has voices installed for ' + selectedLanguage + '.');
+                };
+
+                synth.speak(utterance);
+            }
+        }
+
+        // Clear the current message
+        function clearMessage() {
+            currentMessage = [];
+            updateMessageArea();
+            const clearBtn = document.getElementById('clearBtn');
+            clearBtn.classList.add('clear-button-shake');
+            clearBtn.addEventListener('animationend', () => {
+                clearBtn.classList.remove('clear-button-shake');
+            }, { once: true });
+        }
+
+        // Settings Modal Functions
+        const settingsModal = document.getElementById('settingsModal');
+
+        function openSettingsModal() {
+            settingsModal.style.display = 'flex';
+            populateCategorySelect(); // For adding elements
+            populateCategorySelectForRemoval(); // For removing categories
+            populateCategorySelectForElementRemoval(); // For removing elements
+        }
+
+        function closeSettingsModal() {
+            settingsModal.style.display = 'none';
+        }
+
+        // Populates category select dropdown for adding new elements
+        function populateCategorySelect() {
+            const select = document.getElementById('selectCategoryForElement');
+            select.innerHTML = '<option value="">Select Category</option>'; // Clear and add default
+            const currentTranslation = translations[selectedLanguage];
+            for (const categoryKey in currentTranslation.buttons) {
+                if (currentTranslation.buttons.hasOwnProperty(categoryKey)) {
+                    const categoryData = currentTranslation.buttons[categoryKey];
+                    const option = document.createElement('option');
+                    option.value = categoryKey;
+                    option.textContent = categoryData.categoryName || categoryKey;
+                    select.appendChild(option);
+                }
+            }
+        }
+
+        // Populates category select dropdown for removing categories
+        function populateCategorySelectForRemoval() {
+            const select = document.getElementById('selectCategoryToRemove');
+            select.innerHTML = '<option value="">Select Category to Remove</option>'; // Clear and add default
+            const currentTranslation = translations[selectedLanguage];
+            for (const categoryKey in currentTranslation.buttons) {
+                if (currentTranslation.buttons.hasOwnProperty(categoryKey)) {
+                    const categoryData = currentTranslation.buttons[categoryKey];
+                    const option = document.createElement('option');
+                    option.value = categoryKey;
+                    option.textContent = categoryData.categoryName || categoryKey;
+                    select.appendChild(option);
+                }
+            }
+        }
+
+        // Populates category select dropdown for removing elements
+        function populateCategorySelectForElementRemoval() {
+            const select = document.getElementById('selectCategoryForElementRemoval');
+            select.innerHTML = '<option value="">Select Category</option>'; // Clear and add default
+            const currentTranslation = translations[selectedLanguage];
+            for (const categoryKey in currentTranslation.buttons) {
+                if (currentTranslation.buttons.hasOwnProperty(categoryKey)) {
+                    const categoryData = currentTranslation.buttons[categoryKey];
+                    const option = document.createElement('option');
+                    option.value = categoryKey;
+                    option.textContent = categoryData.categoryName || categoryKey;
+                    select.appendChild(option);
+                }
+            }
+            // Also clear the element select when category select is populated
+            document.getElementById('selectElementToRemove').innerHTML = '<option value="">Select Element to Remove</option>';
+        }
+
+        // Populates element select dropdown based on chosen category for removal
+        function populateElementSelectForRemoval() {
+            const categoryKey = document.getElementById('selectCategoryForElementRemoval').value;
+            const selectElement = document.getElementById('selectElementToRemove');
+            selectElement.innerHTML = '<option value="">Select Element to Remove</option>'; // Clear and add default
+
+            if (categoryKey) {
+                const currentTranslation = translations[selectedLanguage];
+                const categoryData = currentTranslation.buttons[categoryKey];
+                if (categoryData && categoryData.elements) {
+                    categoryData.elements.forEach((element, index) => {
+                        const option = document.createElement('option');
+                        option.value = index; // Use index as value for easy removal
+                        option.textContent = element.text;
+                        selectElement.appendChild(option);
+                    });
+                }
+            }
+        }
+
+
+        function addCategory(event) {
+            event.preventDefault();
+            const newCategoryNameInput = document.getElementById('newCategoryName');
+            const newCategoryName = newCategoryNameInput.value.trim();
+            
+            if (!newCategoryName) {
+                alert('Category name cannot be empty!');
+                return;
+            }
+
+            const categoryKey = newCategoryName.toLowerCase().replace(/\s/g, ''); // Create a key from the name
+
+            // Check if category already exists in English (as a proxy for both)
+            if (translations['en-US'].buttons[categoryKey]) {
+                alert(`Category "${newCategoryName}" already exists!`);
+                return;
+            }
+
+            // Add to both English and Arabic translations
+            translations['en-US'].buttons[categoryKey] = {
+                categoryName: newCategoryName,
+                elements: []
+            };
+            translations['ar-SA'].buttons[categoryKey] = {
+                categoryName: newCategoryName,
+                elements: []
+            };
+            
+            saveData();
+            updateUIText(); // Re-render categories
+            populateCategorySelect(); // Update all category dropdowns in settings
+            populateCategorySelectForRemoval();
+            populateCategorySelectForElementRemoval();
+            newCategoryNameInput.value = ''; // Clear input
+            alert(`Category "${newCategoryName}" added!`);
+        }
+
+        function addElement(event) {
+            event.preventDefault();
+            const categoryKey = document.getElementById('selectCategoryForElement').value;
+            const newElementTextInput = document.getElementById('newElementText');
+            const newElementEmojiInput = document.getElementById('newElementEmoji');
+            const newElementImageUrlInput = document.getElementById('newElementImageUrl');
+
+            const newElementText = newElementTextInput.value.trim();
+            const newElementEmoji = newElementEmojiInput.value.trim();
+            const newElementImageUrl = newElementImageUrlInput.value.trim();
+
+            if (!categoryKey || !newElementText || (!newElementEmoji && !newElementImageUrl)) {
+                alert('Please fill in all required fields (Text and either Emoji or Image URL).');
+                return;
+            }
+
+            const newElement = {
+                text: newElementText,
+                emoji: newElementEmoji,
+                imageUrl: newElementImageUrl
+            };
+
+            // Add to both English and Arabic translations for the selected category
+            if (translations['en-US'].buttons[categoryKey]) {
+                translations['en-US'].buttons[categoryKey].elements.push(newElement);
+            }
+            if (translations['ar-SA'].buttons[categoryKey]) {
+                translations['ar-SA'].buttons[categoryKey].elements.push(newElement);
+            }
+
+            saveData();
+            // If the current category is the one being modified, refresh its display
+            const activeCategoryBtn = document.querySelector('.category-btn.active');
+            if (activeCategoryBtn && activeCategoryBtn.onclick.toString().includes(`showCategory('${categoryKey}')`)) {
+                showCategory(categoryKey);
+            }
+            populateElementSelectForRemoval(); // Refresh element dropdown
+            newElementTextInput.value = '';
+            newElementEmojiInput.value = '';
+            newElementImageUrlInput.value = '';
+            alert(`Element "${newElementText}" added to category "${translations[selectedLanguage].buttons[categoryKey].categoryName || categoryKey}"!`);
+        }
+
+        function removeCategory(event) {
+            event.preventDefault();
+            const categoryKeyToRemove = document.getElementById('selectCategoryToRemove').value;
+
+            if (!categoryKeyToRemove) {
+                alert('Please select a category to remove.');
+                return;
+            }
+
+            const categoryDisplayName = translations[selectedLanguage].buttons[categoryKeyToRemove]?.categoryName || categoryKeyToRemove;
+
+            if (!confirm(`Are you sure you want to remove the category "${categoryDisplayName}" and all its elements? This action cannot be undone.`)) {
+                return;
+            }
+
+            // Remove from both English and Arabic translations
+            delete translations['en-US'].buttons[categoryKeyToRemove];
+            delete translations['ar-SA'].buttons[categoryKeyToRemove];
+
+            saveData();
+            updateUIText(); // Re-render categories
+            populateCategorySelect(); // Update all category dropdowns in settings
+            populateCategorySelectForRemoval();
+            populateCategorySelectForElementRemoval();
+            document.getElementById('selectCategoryToRemove').value = ''; // Clear selection
+            
+            closeSettingsModal(); // Close modal BEFORE the alert
+            alert(`Category "${categoryDisplayName}" removed!`);
+            
+            // After removing, ensure a valid category is displayed.
+            // If the removed category was the active one, default to the first available.
+            const firstAvailableCategory = Object.keys(currentButtonsData)[0];
+            if (firstAvailableCategory) {
+                showCategory(firstAvailableCategory);
+            } else {
+                // If no categories left, clear the grid
+                document.getElementById('buttonsGrid').innerHTML = '';
+            }
+        }
+
+        function removeElement(event) {
+            event.preventDefault();
+            const categoryKey = document.getElementById('selectCategoryForElementRemoval').value;
+            const elementIndex = document.getElementById('selectElementToRemove').value;
+
+            if (!categoryKey || elementIndex === "") {
+                alert('Please select both a category and an element to remove.');
+                return;
+            }
+
+            const elementText = translations[selectedLanguage].buttons[categoryKey].elements[elementIndex]?.text;
+
+            if (!elementText) { // Defensive check if element doesn't exist for some reason
+                alert('Selected element not found.');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to remove the element "${elementText}" from category "${translations[selectedLanguage].buttons[categoryKey].categoryName || categoryKey}"?`)) {
+                return;
+            }
+
+            // Remove from both English and Arabic translations
+            translations['en-US'].buttons[categoryKey].elements.splice(elementIndex, 1);
+            translations['ar-SA'].buttons[categoryKey].elements.splice(elementIndex, 1);
+
+            saveData();
+            // If the current category is the one being modified, refresh its display
+            const activeCategoryBtn = document.querySelector('.category-btn.active');
+            if (activeCategoryBtn && activeCategoryBtn.onclick.toString().includes(`showCategory('${categoryKey}')`)) {
+                showCategory(categoryKey);
+            }
+            populateElementSelectForRemoval(); // Refresh element dropdown
+            document.getElementById('selectCategoryForElementRemoval').value = ''; // Clear selections
+            document.getElementById('selectElementToRemove').value = '';
+            alert(`Element "${elementText}" removed!`);
+        }
+
+        // Keyboard Functions
+        function toggleKeyboard() {
+            const keyboardContainer = document.getElementById('keyboardContainer');
+            isKeyboardVisible = !isKeyboardVisible;
+            keyboardContainer.style.display = isKeyboardVisible ? 'flex' : 'none';
+            // When keyboard is visible, hide category buttons and vice-versa
+            document.getElementById('categoryTabs').style.display = isKeyboardVisible ? 'none' : 'flex';
+            document.getElementById('buttonsGrid').style.display = isKeyboardVisible ? 'none' : 'grid';
+            updateKeyboardLayout(); // Ensure the correct keyboard is shown/hidden
+        }
+
+        function updateKeyboardLayout() {
+            const englishKeyboard = document.getElementById('englishKeyboard');
+            const arabicKeyboard = document.getElementById('arabicKeyboard');
+
+            if (selectedLanguage === 'ar-SA') {
+                englishKeyboard.style.display = 'none';
+                arabicKeyboard.style.display = 'flex'; // Use flex to maintain column layout
+            } else {
+                englishKeyboard.style.display = 'flex'; // Use flex to maintain column layout
+                arabicKeyboard.style.display = 'none';
+            }
+        }
+
+        function handleKeyboardInput(event) {
+            const key = event.target.dataset.key;
+            let charToAdd = key;
+
+            if (key === 'shift') {
+                isShiftActive = !isShiftActive;
+                // Toggle case for English letters, or specific Arabic shift behavior if needed
+                document.querySelectorAll(`#${selectedLanguage === 'ar-SA' ? 'arabicKeyboard' : 'englishKeyboard'} .keyboard-key`).forEach(k => {
+                    const dataKey = k.dataset.key;
+                    if (selectedLanguage === 'en-US' && dataKey.length === 1 && dataKey.match(/[a-z]/i)) { // Only letters for English
+                        k.textContent = isShiftActive ? dataKey.toUpperCase() : dataKey.toLowerCase();
+                    }
+                    // Add Arabic shift logic here if needed (e.g., for secondary characters)
+                });
+                // Add/remove 'active' class for visual feedback on shift key
+                event.target.classList.toggle('active', isShiftActive);
+                return; // Don't add 'shift' to message
+            }
+
+            if (key === 'backspace') {
+                if (currentMessage.length > 0) {
+                    let lastWord = currentMessage[currentMessage.length - 1];
+                    if (lastWord.length > 0) { // Check if the last word is not empty
+                        currentMessage[currentMessage.length - 1] = lastWord.slice(0, -1);
+                    } else if (currentMessage.length > 0) { // If last word is empty (was a space), remove it
+                        currentMessage.pop();
+                    }
+                }
+            } else if (key === ' ') { // Space key
+                // Only add a space if the last item isn't already a space or if the message is empty
+                if (currentMessage.length === 0 || currentMessage[currentMessage.length - 1] !== '') {
+                    currentMessage.push(''); // Add an empty string to represent a space
+                }
+            } else if (key === 'enter') {
+                speakMessage(); // Speak the current message
+                clearMessage(); // Clear after speaking
+            } else if (key === '123' || key === '١٢٣') {
+                // Toggle numbers/symbols (basic implementation)
+                const keys = document.querySelectorAll(`#${selectedLanguage === 'ar-SA' ? 'arabicKeyboard' : 'englishKeyboard'} .keyboard-key`);
+                keys.forEach(k => {
+                    const dataKey = k.dataset.key;
+                    if (selectedLanguage === 'en-US' && dataKey.length === 1 && dataKey.match(/[a-z]/i)) {
+                        // Simple toggle for now, could expand to full symbol sets
+                        if (k.textContent === dataKey.toLowerCase() || k.textContent === dataKey.toUpperCase()) {
+                            k.textContent = getNumberOrSymbol(dataKey, 'en-US');
+                        } else {
+                            k.textContent = isShiftActive ? dataKey.toUpperCase() : dataKey.toLowerCase();
+                        }
+                    } else if (selectedLanguage === 'ar-SA' && dataKey.length === 1 && dataKey.match(/[\u0600-\u06FF]/)) { // Arabic characters
+                        // Simple toggle for Arabic numbers/symbols
+                        if (k.textContent === dataKey) {
+                            k.textContent = getNumberOrSymbol(dataKey, 'ar-SA');
+                        } else {
+                            k.textContent = dataKey; // Revert to original Arabic character
+                        }
+                    }
+                });
+            }
+            else {
+                if (selectedLanguage === 'en-US' && isShiftActive && charToAdd.length === 1) {
+                    charToAdd = charToAdd.toUpperCase();
+                }
+                // If the last element is an empty string (from a space), or if message is empty, add new word
+                if (currentMessage.length === 0 || currentMessage[currentMessage.length - 1] === '') {
+                    currentMessage.push(charToAdd);
+                } else {
+                    currentMessage[currentMessage.length - 1] += charToAdd;
+                }
+            }
+            updateMessageArea();
+            // Reset shift after a character is typed, unless it's a special key like 123
+            if (key !== 'shift' && key !== '123' && key !== '١٢٣') {
+                isShiftActive = false; 
+                document.querySelectorAll('.keyboard-key[data-key="shift"]').forEach(s => s.classList.remove('active'));
+            }
+        }
+
+        function getNumberOrSymbol(char, lang) {
+            if (lang === 'en-US') {
+                const map = {
+                    'q': '1', 'w': '2', 'e': '3', 'r': '4', 't': '5', 'y': '6', 'u': '7', 'i': '8', 'o': '9', 'p': '0',
+                    'a': '@', 's': '#', 'd': '$', 'f': '%', 'g': '&', 'h': '*', 'j': '(', 'k': ')', 'l': '-',
+                    'z': '+', 'x': '=', 'c': '/', 'v': ':', 'b': ';', 'n': '"', 'm': "'", '.': '!', 'enter': '?'
+                };
+                return map[char.toLowerCase()] || char;
+            } else if (lang === 'ar-SA') {
+                const arabicMap = {
+                    'ض': '١', 'ص': '٢', 'ث': '٣', 'ق': '٤', 'ف': '٥', 'غ': '٦', 'ع': '٧', 'ه': '٨', 'خ': '٩', 'ح': '٠',
+                    'ج': '!', 'د': '@', 'ش': '#', 'س': '$', 'ي': '%', 'ب': '^', 'ل': '&', 'ا': '*', 'ت': '(', 'ن': ')',
+                    'م': '-', 'ك': '_', 'ط': '+', 'ئ': '=', 'ء': '/', 'ؤ': ':', 'ر': ';', 'لا': '"', 'ى': "'", 'ة': '<',
+                    'و': '>', 'ز': ',', 'ظ': '.', '.': '؟', 'enter': '\n'
+                };
+                return arabicMap[char] || char;
+            }
+            return char;
+        }
+    </script>
+</body>
+</html>
+
+</html>
